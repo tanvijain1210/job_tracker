@@ -37,7 +37,7 @@ export default function SignUp() {
             setError(result.error.message || "An error occurred");
           }
           else{
-            router.push("/sign-in");
+            router.push("/dashboard");
           }
         }
         catch(err){

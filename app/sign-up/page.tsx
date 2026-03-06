@@ -9,11 +9,45 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {signUp} from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SignUp() {
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const router= useRouter();
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+
+        try{
+        const result=  await signUp.email({
+            email, name , password,
+          });
+          if (result.error){
+            setError(result.error.message || "An error occurred");
+          }
+          else{
+            router.push("/sign-in");
+          }
+        }
+        catch(err){
+            setError("Failed to create account. Please try again.");
+        }
+        finally{
+            setLoading(false);
+        }
+    }
+        
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       
@@ -31,15 +65,31 @@ export default function SignUp() {
 
         <form className="grid gap-6">
           <CardContent className="grid gap-4">
+{error && (
+              <div className="p-3 text-sm text-red-600 bg-red-100 rounded">
+                {error}
+              </div>
+            )}
 
             <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>
-              <Input id="name" placeholder="Enter your name" />
+              <Input
+                id="name"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" placeholder="m@example.com" type="email" />
+              <Input
+                id="email"
+                placeholder="m@example.com"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
 
             <div className="grid gap-2">
@@ -48,6 +98,8 @@ export default function SignUp() {
                 id="password"
                 placeholder="••••••••"
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
@@ -55,8 +107,8 @@ export default function SignUp() {
 
           <CardFooter className="flex flex-col gap-4">
             
-            <Button type="submit" className="w-full">
-              Sign Up
+            <Button type="submit" className="w-full" disabled={loading} onClick={handleSubmit}>
+            {loading ? "Creating Account..." : "Sign Up"}
             </Button>
 
             <p className="text-sm text-muted-foreground text-center">
